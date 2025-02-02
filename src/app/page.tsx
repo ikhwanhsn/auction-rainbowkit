@@ -8,24 +8,40 @@ import {
 import { contractABIAuctionFactory } from "../services/abi";
 import { contractAddressAuctionFactory } from "@/services/contractAddress";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
 
+// Home Component
 const Home = () => {
-  const router = useRouter();
+  const notifyTransactionPending = () => toast("Your transaction is pending!");
+  const notifyTransactionSuccess = () => toast("Transaction success!");
   const [timeCreationContract, setTimeCreationContract] = useState<string>("");
   const [dataAuction, setDataAuction] = useState([]);
-  const { data: balance }: { data: [] | undefined } = useReadContract({
+
+  const {
+    data: balance,
+    refetch,
+    isPending: isFetching,
+  }: {
+    data: [] | undefined;
+    refetch: () => void;
+    isPending: boolean;
+  } = useReadContract({
     address: contractAddressAuctionFactory,
     abi: contractABIAuctionFactory,
     functionName: "getAuctions",
     args: [],
   });
+
   // Create Auction
   const { data: hash, isPending, writeContract } = useWriteContract();
+
+  // Transaction confirmation
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
     });
+
+  // Submit form create auction
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
@@ -35,31 +51,41 @@ const Home = () => {
         functionName: "createAuction",
         args: [BigInt(timeCreationContract)],
       });
-      if (isPending) {
-        alert("Contract successfully created!");
-        setTimeCreationContract("");
-        const modal = document.getElementById(
-          "my_modal_2"
-        ) as HTMLDialogElement;
-        modal?.close();
-      }
     } catch (error) {
       console.log(error);
     }
   };
 
+  // Handle balance updates
   useEffect(() => {
     if (balance) {
       setDataAuction(balance);
-      console.log(dataAuction);
     }
-  }, [balance, hash]);
+  }, [balance]);
+
+  // Handle transaction confirmation
+  useEffect(() => {
+    if (isConfirming) {
+      setTimeCreationContract("");
+      const modal = document.getElementById("my_modal_2") as HTMLDialogElement;
+      modal?.close();
+      notifyTransactionPending();
+    }
+  }, [isConfirming]);
+
+  // Handle successful transaction
+  useEffect(() => {
+    if (isConfirmed) {
+      refetch();
+      notifyTransactionSuccess();
+    }
+  }, [isConfirmed]);
 
   return (
     <main className="px-5 py-7">
+      <ToastContainer />
       <section className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">List of Auctions</h1>
-        <p>{isConfirming ? "Transaction in progress..." : ""}</p>
         <aside className="space-x-2">
           {/* Button Create Auction */}
           <button
@@ -87,13 +113,19 @@ const Home = () => {
                   placeholder="Time in seconds"
                   value={timeCreationContract}
                   onChange={(e) => setTimeCreationContract(e.target.value)}
+                  required
                 />
                 <section className="space-x-1 mt-2">
-                  <button className="btn btn-primary text-white" type="submit">
-                    Create
+                  <button
+                    className="btn btn-primary text-white"
+                    type="submit"
+                    disabled={isPending}
+                  >
+                    {isPending ? "Creating..." : "Create"}
                   </button>
                   <button
                     className="btn btn-error text-white"
+                    type="button"
                     onClick={() => {
                       const modal = document.getElementById(
                         "my_modal_2"
@@ -115,8 +147,9 @@ const Home = () => {
           </button>
         </aside>
       </section>
+      <p>{isFetching && "Loading..."}</p>
       {/* List of auctions */}
-      <section className="mt-3 space-y-1">
+      <section className="mt-3 space-y-1 grid grid-cols-3">
         {dataAuction.length > 0 &&
           dataAuction.map((auction, index) => (
             <section

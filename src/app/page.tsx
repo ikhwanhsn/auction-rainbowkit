@@ -1,11 +1,18 @@
 "use client";
 
-import { useReadContract, useWriteContract } from "wagmi";
+import {
+  useReadContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import { contractABIAuctionFactory } from "../services/abi";
 import { contractAddressAuctionFactory } from "@/services/contractAddress";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const Home = () => {
+  const router = useRouter();
+  const [timeCreationContract, setTimeCreationContract] = useState<string>("");
   const [dataAuction, setDataAuction] = useState([]);
   const { data: balance }: { data: [] | undefined } = useReadContract({
     address: contractAddressAuctionFactory,
@@ -13,18 +20,33 @@ const Home = () => {
     functionName: "getAuctions",
     args: [],
   });
-  const { data: hash, writeContract } = useWriteContract();
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const tokenId = formData.get("tokenId") as string;
-    writeContract({
-      address: contractAddressAuctionFactory,
-      abi: contractABIAuctionFactory,
-      functionName: "mint",
-      args: [BigInt(tokenId)],
+  // Create Auction
+  const { data: hash, isPending, writeContract } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
     });
-  }
+  const submit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      writeContract({
+        address: contractAddressAuctionFactory,
+        abi: contractABIAuctionFactory,
+        functionName: "createAuction",
+        args: [BigInt(timeCreationContract)],
+      });
+      if (isPending) {
+        alert("Contract successfully created!");
+        setTimeCreationContract("");
+        const modal = document.getElementById(
+          "my_modal_2"
+        ) as HTMLDialogElement;
+        modal?.close();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     if (balance) {
@@ -37,6 +59,7 @@ const Home = () => {
     <main className="px-5 py-7">
       <section className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">List of Auctions</h1>
+        <p>{isConfirming ? "Transaction in progress..." : ""}</p>
         <aside className="space-x-2">
           {/* Button Create Auction */}
           <button
@@ -54,6 +77,7 @@ const Home = () => {
           <dialog id="my_modal_2" className="modal ">
             <div className="modal-box bg-white text-black">
               <h3 className="font-bold text-lg">Hello!</h3>
+
               <p className="py-4">Press ESC key or click outside to close</p>
               <form onSubmit={submit}>
                 <input
@@ -61,6 +85,8 @@ const Home = () => {
                   name="tokenId"
                   className="input input-bordered w-full bg-white input-primary"
                   placeholder="Time in seconds"
+                  value={timeCreationContract}
+                  onChange={(e) => setTimeCreationContract(e.target.value)}
                 />
                 <section className="space-x-1 mt-2">
                   <button className="btn btn-primary text-white" type="submit">
@@ -100,15 +126,6 @@ const Home = () => {
               {auction}
             </section>
           ))}
-        <section className="card w-full border px-5 py-3 shadow-sm">
-          First Auction
-        </section>
-        <section className="card w-full border px-5 py-3 shadow-sm">
-          First Auction
-        </section>
-        <section className="card w-full border px-5 py-3 shadow-sm">
-          First Auction
-        </section>
       </section>
     </main>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  useReadContract,
+  useReadContracts,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -9,6 +9,7 @@ import { contractABIAuctionFactory } from "../services/abi";
 import { contractAddressAuctionFactory } from "@/services/contractAddress";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
+import Link from "next/link";
 
 // Home Component
 const Home = () => {
@@ -18,19 +19,19 @@ const Home = () => {
   const [dataAuction, setDataAuction] = useState([]);
 
   const {
-    data: balance,
-    refetch,
+    data,
     isPending: isFetching,
-  }: {
-    data: [] | undefined;
-    refetch: () => void;
-    isPending: boolean;
-  } = useReadContract({
-    address: contractAddressAuctionFactory,
-    abi: contractABIAuctionFactory,
-    functionName: "getAuctions",
-    args: [],
+    refetch,
+  }: { data: any; isPending: boolean; refetch: () => void } = useReadContracts({
+    contracts: [
+      {
+        address: contractAddressAuctionFactory,
+        abi: contractABIAuctionFactory,
+        functionName: "getAuctions",
+      },
+    ],
   });
+  const [getAuctions, auctions] = data || [];
 
   // Create Auction
   const { data: hash, isPending, writeContract } = useWriteContract();
@@ -58,10 +59,10 @@ const Home = () => {
 
   // Handle balance updates
   useEffect(() => {
-    if (balance) {
-      setDataAuction(balance);
+    if (data) {
+      setDataAuction(data[0].result);
     }
-  }, [balance]);
+  }, [data]);
 
   // Handle transaction confirmation
   useEffect(() => {
@@ -149,15 +150,16 @@ const Home = () => {
       </section>
       <p>{isFetching && "Loading..."}</p>
       {/* List of auctions */}
-      <section className="mt-3 space-y-1 grid grid-cols-3">
+      <section className="mt-3 gap-1 grid grid-cols-3">
         {dataAuction.length > 0 &&
-          dataAuction.map((auction, index) => (
-            <section
+          dataAuction?.map((auction, index) => (
+            <Link
+              href={`/auction/${auction}`}
               key={index}
-              className="card w-full border px-5 py-3 shadow-sm"
+              className="card w-full border px-5 py-3 shadow-sm hover:bg-gray-50 hover:shadow-md"
             >
               {auction}
-            </section>
+            </Link>
           ))}
       </section>
     </main>

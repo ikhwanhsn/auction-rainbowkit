@@ -23,9 +23,16 @@ const AuctionPage = () => {
   const { contract } = useParams();
   const { isConnected } = useAccount();
   const contractAddress = contract as `0x${string}`;
-  const { data: hash, writeContract } = useWriteContract();
+  const { data: hash, writeContract, isPending } = useWriteContract();
+  const {
+    data: withdraw,
+    writeContract: withdrawWrite,
+    isPending: withdrawPending,
+  } = useWriteContract();
   const notifyTransactionPending = () => toast("Your transaction is pending!");
   const notifyTransactionSuccess = () => toast("Transaction success!");
+  const notifyWithdrawPending = () => toast("Your withdraw is pending!");
+  const notifyWithdrawSuccess = () => toast("Withdraw success!");
   const [auctionEnd, setAuctionEnd] = useState<dayjs.Dayjs | null>(null);
   const [remainingTime, setRemainingTime] = useState<string>("");
   const [timeCreationContract, setTimeCreationContract] = useState<string>("");
@@ -82,6 +89,9 @@ const AuctionPage = () => {
     try {
       const formData = new FormData(e.target as HTMLFormElement);
       const bid = formData.get("bid") as string;
+      if (Number(bid) <= Number(highestBid?.result)) {
+        alert("Bid must be higher than the highest bid");
+      }
       writeContract({
         address: contractAddress,
         abi: contractABISimpleAuction,
@@ -93,10 +103,33 @@ const AuctionPage = () => {
     }
   };
 
-  // Transaction confirmation
+  // Withdraw function
+  const handleWithdraw = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    try {
+      if (Number(pendingReturn?.result) === 0) {
+        alert("Nothing to withdraw");
+      }
+      withdrawWrite({
+        address: contractAddress,
+        abi: contractABISimpleAuction,
+        functionName: "withdraw",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Transaction bid confirmation
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
+    });
+
+  // Transaction withdraw confirmation
+  const { isLoading: isLoadingWithdraw, isSuccess: isSuccessWithdraw } =
+    useWaitForTransactionReceipt({
+      hash: withdraw,
     });
 
   // Copy to clipboard
@@ -161,14 +194,14 @@ const AuctionPage = () => {
     }
   }, [auctionEnd]);
 
-  // Handle transaction confirmation
+  // Handle bid transaction confirmation
   useEffect(() => {
     if (isConfirming) {
       notifyTransactionPending();
     }
   }, [isConfirming]);
 
-  // Handle successful transaction
+  // Handle bid successful transaction
   useEffect(() => {
     if (isConfirmed) {
       setTimeCreationContract("");
@@ -176,6 +209,22 @@ const AuctionPage = () => {
       notifyTransactionSuccess();
     }
   }, [isConfirmed]);
+
+  // Handle withdraw transaction confirmation
+  useEffect(() => {
+    if (isLoadingWithdraw) {
+      notifyWithdrawPending();
+    }
+  }, [isLoadingWithdraw]);
+
+  // Handle withdraw successful transaction
+  useEffect(() => {
+    if (isSuccessWithdraw) {
+      setTimeCreationContract("");
+      refetch();
+      notifyWithdrawSuccess();
+    }
+  }, [isSuccessWithdraw]);
 
   useEffect(() => {
     setIdAuction(String(localStorage.getItem("idAuction")));
@@ -306,11 +355,14 @@ const AuctionPage = () => {
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
                 type="submit"
               >
-                Place Bid
+                {isPending ? "Bidding..." : "Place Bid"}
               </button>
             </form>
-            <button className="w-full mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all">
-              Withdraw
+            <button
+              className="w-full mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
+              onClick={handleWithdraw}
+            >
+              {withdrawPending ? "Withdrawing..." : "Withdraw"}
             </button>
           </div>
         </main>

@@ -87,6 +87,11 @@ const AuctionPage = () => {
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      if (auctionEnd && dayjs().isAfter(auctionEnd)) {
+        alert("Auction has ended");
+        setTimeCreationContract("");
+        return;
+      }
       const formData = new FormData(e.target as HTMLFormElement);
       const bid = formData.get("bid") as string;
       if (Number(bid) <= Number(highestBid?.result)) {
@@ -107,8 +112,13 @@ const AuctionPage = () => {
   const handleWithdraw = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
-      if (Number(pendingReturn?.result) === 0) {
+      if (auctionEnd && dayjs().isAfter(auctionEnd)) {
+        alert("Auction has ended");
+        return;
+      }
+      if (pendingReturn?.result === undefined) {
         alert("Nothing to withdraw");
+        return;
       }
       withdrawWrite({
         address: contractAddress,

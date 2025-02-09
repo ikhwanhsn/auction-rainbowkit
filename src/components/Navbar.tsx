@@ -34,9 +34,9 @@ const Navbar = () => {
             </li>
           </ul>
         </div>
-        <a href="/" className="text-2xl font-bold">
+        <Link href="/" className="text-2xl font-bold">
           Auction App
-        </a>
+        </Link>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">

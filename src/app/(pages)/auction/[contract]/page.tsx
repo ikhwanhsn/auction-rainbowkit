@@ -175,12 +175,12 @@ const AuctionPage = () => {
         setAuctionEnd(null);
       }
     }
-  }, [data]);
+  }, [data, auctionEndTime.result]);
 
   // Refetch when contract changes
   useEffect(() => {
     refetch();
-  }, [contract]);
+  }, [contract, refetch]);
 
   // Set remaining time
   useEffect(() => {
@@ -218,7 +218,7 @@ const AuctionPage = () => {
       refetch();
       notifyTransactionSuccess();
     }
-  }, [isConfirmed]);
+  }, [isConfirmed, refetch]);
 
   // Handle withdraw transaction confirmation
   useEffect(() => {
@@ -234,7 +234,7 @@ const AuctionPage = () => {
       refetch();
       notifyWithdrawSuccess();
     }
-  }, [isSuccessWithdraw]);
+  }, [isSuccessWithdraw, refetch]);
 
   useEffect(() => {
     setIdAuction(String(localStorage.getItem("idAuction")));

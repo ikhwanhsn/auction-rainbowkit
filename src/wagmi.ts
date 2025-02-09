@@ -1,5 +1,5 @@
 import "@rainbow-me/rainbowkit/styles.css";
-import { Chain, getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { mainnet, sepolia } from "wagmi/chains";
 
 // const goChainTestnet = {

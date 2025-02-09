@@ -56,7 +56,7 @@ const handleAuctionEndTime = async (
 ) => {
   try {
     if (contract) {
-      const res: BigInt = await contract.methods.auctionEndTime().call();
+      const res: bigint = await contract.methods.auctionEndTime().call();
       const timestamp = res.toString();
       const date = dayjs(Number(timestamp) * 1000);
       setAuctionEndTime(date);

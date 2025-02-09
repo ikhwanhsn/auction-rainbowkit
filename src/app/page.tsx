@@ -20,7 +20,6 @@ const Home = () => {
   const notifyTransactionSuccess = () => toast("Transaction success!");
   const [timeCreationContract, setTimeCreationContract] = useState<string>("");
   const [dataAuction, setDataAuction] = useState([]);
-  const [typeAuction, setTypeAuction] = useState("all");
 
   // Read data from smart contract
   const {
@@ -70,6 +69,7 @@ const Home = () => {
   // Handle balance updates
   useEffect(() => {
     if (data) {
+      console.log(data);
       setDataAuction(data[0].result);
     }
   }, [data]);
@@ -90,7 +90,7 @@ const Home = () => {
       refetch();
       notifyTransactionSuccess();
     }
-  }, [isConfirmed]);
+  }, [isConfirmed, refetch]);
 
   return (
     <>
@@ -166,29 +166,27 @@ const Home = () => {
 
           {/* List of auctions */}
           <section className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {typeAuction === "all" &&
-              [...(dataAuction || [])].reverse().map((auction, index, arr) => {
-                const auctionNumber = (arr.length - index)
-                  .toString()
-                  .padStart(5, "0");
+            {[...(dataAuction || [])].reverse().map((auction, index, arr) => {
+              const auctionNumber = (arr.length - index)
+                .toString()
+                .padStart(5, "0");
 
-                return (
-                  <Link
-                    href={`/auction/${auction}`}
-                    key={index}
-                    className="p-5 bg-white rounded-lg shadow-md border hover:shadow-lg transition-all"
-                    onClick={() => {
-                      localStorage.setItem("idAuction", auctionNumber);
-                    }}
-                  >
-                    <section className="text-lg font-semibold text-gray-800 tracking-tight">
-                      <p>Auction #{auctionNumber}</p>
-                      <span className="text-base font-normal">{auction}</span>
-                    </section>
-                  </Link>
-                );
-              })}
-            {typeAuction === "my" && <p>This is my auctions</p>}
+              return (
+                <Link
+                  href={`/auction/${auction}`}
+                  key={index}
+                  className="p-5 bg-white rounded-lg shadow-md border hover:shadow-lg transition-all"
+                  onClick={() => {
+                    localStorage.setItem("idAuction", auctionNumber);
+                  }}
+                >
+                  <section className="text-lg font-semibold text-gray-800 tracking-tight">
+                    <p>Auction #{auctionNumber}</p>
+                    <span className="text-base font-normal">{auction}</span>
+                  </section>
+                </Link>
+              );
+            })}
           </section>
         </main>
       ) : (

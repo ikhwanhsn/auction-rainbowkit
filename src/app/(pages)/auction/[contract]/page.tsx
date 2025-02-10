@@ -16,7 +16,6 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { ToastContainer, toast } from "react-toastify";
 import { LuCopy, LuCopyCheck } from "react-icons/lu";
-import { formatUnits } from "viem";
 
 dayjs.extend(duration);
 

@@ -315,7 +315,7 @@ const AuctionPage = () => {
               <p className="text-lg font-semibold">
                 Highest Bid:{" "}
                 <span className="font-normal">
-                  {highestBid?.result as string} ETH
+                  {(highestBid?.result as number) / 1000000000000000000} ETH
                 </span>
               </p>
               <p className="text-lg font-semibold flex items-center gap-2">
@@ -351,7 +351,9 @@ const AuctionPage = () => {
               <p className="text-lg font-semibold">
                 Pending Return:{" "}
                 <span className="font-normal">
-                  {(pendingReturn?.result as string) || "0"} ETH
+                  {(pendingReturn?.result as number) / 1000000000000000000 ||
+                    "0"}{" "}
+                  ETH
                 </span>
               </p>
             </div>

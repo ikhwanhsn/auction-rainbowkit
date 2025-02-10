@@ -1,6 +1,6 @@
 import "@rainbow-me/rainbowkit/styles.css";
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { mainnet, sepolia } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 
 // const goChainTestnet = {
 //   id: 31337,
@@ -28,6 +28,6 @@ import { mainnet, sepolia } from "wagmi/chains";
 export const config = getDefaultConfig({
   appName: "My RainbowKit App",
   projectId: process.env.NEXT_PUBLIC_REOWN_PROJECT_ID || "",
-  chains: [mainnet, sepolia],
+  chains: [sepolia],
   ssr: true,
 });

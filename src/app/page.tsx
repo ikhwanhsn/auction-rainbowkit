@@ -4,6 +4,7 @@
 import {
   useAccount,
   useReadContracts,
+  UseReadContractsReturnType,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -19,14 +20,14 @@ const Home = () => {
   const notifyTransactionPending = () => toast("Your transaction is pending!");
   const notifyTransactionSuccess = () => toast("Transaction success!");
   const [timeCreationContract, setTimeCreationContract] = useState<string>("");
-  const [dataAuction, setDataAuction] = useState([]);
+  const [dataAuction, setDataAuction] = useState<string[]>([]);
 
   // Read data from smart contract
   const {
     data,
     isPending: isFetching,
     refetch,
-  }: { data: any; isPending: boolean; refetch: () => void } = useReadContracts({
+  }: UseReadContractsReturnType = useReadContracts({
     contracts: [
       {
         address: contractAddressAuctionFactory,
@@ -69,8 +70,7 @@ const Home = () => {
   // Handle balance updates
   useEffect(() => {
     if (data) {
-      console.log(data);
-      setDataAuction(data[0].result);
+      setDataAuction(data[0].result as string[]);
     }
   }, [data]);
 

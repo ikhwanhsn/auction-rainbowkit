@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import {
   useAccount,
   useReadContracts,
+  UseReadContractsReturnType,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -42,10 +43,7 @@ const AuctionPage = () => {
   const [idAuction, setIdAuction] = useState<string>("");
 
   // Read data from smart contract
-  const {
-    data,
-    refetch,
-  }: { data: any; isPending: boolean; refetch: () => void } = useReadContracts({
+  const { data, refetch }: UseReadContractsReturnType = useReadContracts({
     contracts: [
       {
         address: contractAddress,
@@ -94,14 +92,16 @@ const AuctionPage = () => {
       }
       const formData = new FormData(e.target as HTMLFormElement);
       const bid = formData.get("bid") as string;
+      const toETH = Number(bid) * 1000000000000000000;
       if (Number(bid) <= Number(highestBid?.result)) {
         alert("Bid must be higher than the highest bid");
+        return;
       }
       writeContract({
         address: contractAddress,
         abi: contractABISimpleAuction,
         functionName: "bid",
-        value: BigInt(bid),
+        value: BigInt(toETH),
       });
     } catch (error) {
       console.log(error);
@@ -175,7 +175,7 @@ const AuctionPage = () => {
         setAuctionEnd(null);
       }
     }
-  }, [data, auctionEndTime.result]);
+  }, [data, auctionEndTime?.result]);
 
   // Refetch when contract changes
   useEffect(() => {
@@ -298,21 +298,25 @@ const AuctionPage = () => {
                     target="_blank"
                     className="text-gray-900 font-normal hover:text-blue-500 hover:underline"
                   >
-                    {beneficiary?.result}
+                    {beneficiary?.result as string}
                   </Link>{" "}
                   {isCopied2 ? (
                     <LuCopyCheck className="text-green-500" />
                   ) : (
                     <LuCopy
                       className="hover:text-blue-500 cursor-pointer"
-                      onClick={() => copyToClipboard(beneficiary?.result, 2)}
+                      onClick={() =>
+                        copyToClipboard(beneficiary?.result as string, 2)
+                      }
                     />
                   )}
                 </span>
               </p>
               <p className="text-lg font-semibold">
                 Highest Bid:{" "}
-                <span className="font-normal">{highestBid?.result} ETH</span>
+                <span className="font-normal">
+                  {highestBid?.result as string} ETH
+                </span>
               </p>
               <p className="text-lg font-semibold flex items-center gap-2">
                 Highest Bidder:{" "}
@@ -326,7 +330,7 @@ const AuctionPage = () => {
                       target="_blank"
                       className="text-gray-900 font-normal hover:text-blue-500 hover:underline"
                     >
-                      {highestBidder?.result}
+                      {highestBidder?.result as string}
                     </Link>
                   )}
                   {isCopied3 ? (
@@ -337,7 +341,7 @@ const AuctionPage = () => {
                       <LuCopy
                         className="hover:text-blue-500 cursor-pointer"
                         onClick={() =>
-                          copyToClipboard(highestBidder?.result, 3)
+                          copyToClipboard(highestBidder?.result as string, 3)
                         }
                       />
                     )
@@ -347,7 +351,7 @@ const AuctionPage = () => {
               <p className="text-lg font-semibold">
                 Pending Return:{" "}
                 <span className="font-normal">
-                  {pendingReturn?.result || "0"} ETH
+                  {(pendingReturn?.result as string) || "0"} ETH
                 </span>
               </p>
             </div>

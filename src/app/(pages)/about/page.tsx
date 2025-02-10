@@ -1,7 +1,7 @@
 const AboutPage = () => {
   return (
     <main>
-      <h1>About Page</h1>
+      <h1 className="text-center mt-12 italic">Cooming soon...</h1>
     </main>
   );
 };

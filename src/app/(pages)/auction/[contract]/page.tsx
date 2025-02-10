@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { ToastContainer, toast } from "react-toastify";
 import { LuCopy, LuCopyCheck } from "react-icons/lu";
+import { formatUnits } from "viem";
 
 dayjs.extend(duration);
 
@@ -95,6 +96,10 @@ const AuctionPage = () => {
       const toETH = Number(bid) * 1000000000000000000;
       if (Number(bid) <= Number(highestBid?.result)) {
         alert("Bid must be higher than the highest bid");
+        return;
+      }
+      if (Number(bid) < 0.0001) {
+        alert("Bid must be higher than 0.0001 ETH");
         return;
       }
       writeContract({
@@ -315,7 +320,7 @@ const AuctionPage = () => {
               <p className="text-lg font-semibold">
                 Highest Bid:{" "}
                 <span className="font-normal">
-                  {(highestBid?.result as number) / 1000000000000000000} ETH
+                  {Number(highestBid?.result) / 1e18} ETH
                 </span>
               </p>
               <p className="text-lg font-semibold flex items-center gap-2">
@@ -351,9 +356,7 @@ const AuctionPage = () => {
               <p className="text-lg font-semibold">
                 Pending Return:{" "}
                 <span className="font-normal">
-                  {(pendingReturn?.result as number) / 1000000000000000000 ||
-                    "0"}{" "}
-                  ETH
+                  {Number(pendingReturn?.result) / 1e18 || 0} ETH
                 </span>
               </p>
             </div>

@@ -1,6 +1,6 @@
 # Auction DApp
 
-![Auction DApp](https://your-image-url.com/preview.png)
+![Auction DApp]()
 _A simple decentralized auction platform built with Next.js, Solidity, Wagmi, and RainbowKit._
 
 ## 🚀 Features
@@ -32,7 +32,7 @@ The core functionality of the auction platform is handled by a Solidity smart co
 
 ## 🎨 UI/UX Preview
 
-![UI Preview](https://ibb.co.com/zHjtf77n)
+![UI Preview](https://i.ibb.co.com/Hp19gxxF/Macbook-Air-auction-rainbowkit-vercel-app.png)
 
 ## 📦 Installation & Setup
 

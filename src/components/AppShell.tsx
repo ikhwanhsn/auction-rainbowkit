@@ -14,7 +14,7 @@ const AppShell = ({ children }: { children: React.ReactNode }) => {
       {children}
       <footer
         className={`bg-white text-black text-center p-4 text-sm ${
-          isConnected && pathname === "/" ? "" : "fixed"
+          isConnected && pathname !== "/about" ? "" : "fixed"
         } bottom-0 w-full`}
       >
         Copyright &copy; 2025 Solidity Auction Factory by SmartWeb3 ID
